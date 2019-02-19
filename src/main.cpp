@@ -152,7 +152,7 @@ void showHelp(void)
     std::cout << "Assembles given assembly file and assembles into output files." << std::endl;
     std::cout << "These files are:" << std::endl;
     std::cout << "    pc_data       - Contains the starting locations in memory of every process defined in the program." << std::endl;
-    std::cout << "    inst_data     - Contains the optcodes that make the program." << std::endl;
+    std::cout << "    inst_data     - Contains the opcodes that make the program." << std::endl;
     std::cout << "    dta_data      - Contains the values for any data registers defined." << std::endl;
     std::cout << "    reg_data      - Contains the values for any registers defined." << std::endl;
     std::cout << "    config.v      - Assembler created config file." << std::endl;
