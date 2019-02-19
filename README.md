@@ -10,7 +10,7 @@ Navigate to the location where you cloned the project and run the make file.
 `$ cd location/of/AVasm`  
 `$ make`
 
-This should create the avasm binary in the build directory. Copy this binary to a location on your drive that is in your _$PATH_ or run loacally with `./avasm`. 
+This should create the avasm binary in the build directory. Copy this binary to a location on your drive that is in your _$PATH_ or run locally with `./avasm`. 
 
 ### Useage  
 To assemble a file run avasm as such:
@@ -19,7 +19,7 @@ To assemble a file run avasm as such:
 
 This should produce the output files needed to create the avalanche processor.  
 - pc_data       - Contains the starting locations in memory of every process defined in the program.
-- inst_data     - Contains the optcodes that make the program.
+- inst_data     - Contains the opcodes that make the program.
 - dta_data      - Contains the values for any data registers defined.
 - reg_data      - Contains the values for any registers defined.
 - config.v      - Assembler created config file.
