@@ -36,6 +36,8 @@ const int MACRO_JBS_LENGTH = 2;
 const int MACRO_JBC_LENGTH = 2;
 const int MACRO_JGE_LENGTH = 2;
 const int MACRO_JLT_LENGTH = 2;
+const int MACRO_ST_LENGTH = 1;
+const int MACRO_LD_LENGTH = 1;
 } // namespace instructions
 
 int instructions::getLengthOfMacro(std::string m)
@@ -76,6 +78,10 @@ int instructions::getLengthOfMacro(std::string m)
         return MACRO_JGE_LENGTH;
     else if (m == MACRO_JLT)
         return MACRO_JLT_LENGTH;
+    else if (m == MACRO_LD)
+        return MACRO_LD_LENGTH;
+    else if (m == MACRO_ST)
+        return MACRO_ST_LENGTH;
     return 0; // Not a macro so no length
 }
 
