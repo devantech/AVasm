@@ -68,6 +68,7 @@ std::vector<std::string> Token::macros = [] {
     m.push_back(MACRO_DEC);
     m.push_back(MACRO_LD);
     m.push_back(MACRO_ST);
+    m.push_back(MACRO_MOV);
     return m;
 }();
 

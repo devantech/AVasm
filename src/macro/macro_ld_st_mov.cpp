@@ -72,3 +72,27 @@ void instructions::LD::build()
     data.ins_list.push_back(cmd);
     data.insertLog(state.line_number, state.prog_count++, cmd, state.line);
 }
+
+void instructions::MOV::build()
+{
+    
+
+    Symbol dest, reg;
+
+    if (getPossibleIndirectReg(dest))
+        command |= 0x80;
+
+    if (!checkComma())
+        return;
+
+    if (getPossibleIndirectReg(reg))
+        command |= 0x40;
+
+    std::string cmd = stutils::int_to_hex(command);
+    cmd += stutils::int_to_hex(dest.location());
+    cmd += "00";
+    cmd += stutils::int_to_hex(reg.location());
+
+    data.ins_list.push_back(cmd);
+    data.insertLog(state.line_number, state.prog_count++, cmd, state.line);
+}

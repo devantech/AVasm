@@ -283,6 +283,16 @@ class ST : public MacroCommand
     void build();
 };
 
+class MOV : public MacroCommand
+{
+  public:
+    MOV(AsmData &d, AssemblerState &s, TokenList &tl, SymbolList &sl) : MacroCommand(d, s, tl, sl)
+    {
+      command = INSTRUCTION_ADD_VALUE;
+    }
+    void build();
+};
+
 } // namespace instructions
 
 #endif

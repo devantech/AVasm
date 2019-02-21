@@ -88,6 +88,7 @@ const std::string MACRO_JLT = "jlt";
 const std::string MACRO_JGE = "jge";
 const std::string MACRO_LD = "ld";
 const std::string MACRO_ST = "st";
+const std::string MACRO_MOV = "mov";
 
 /*
 The data types that can be defined

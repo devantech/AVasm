@@ -355,4 +355,6 @@ void Assemble::doMacro(Token &t)
         instructions::LD(data, state, token_list, symbol_list).build();
     else if (t.s_value == MACRO_ST)
         instructions::ST(data, state, token_list, symbol_list).build();
+    else if (t.s_value == MACRO_MOV)
+        instructions::MOV(data, state, token_list, symbol_list).build();
 }
