@@ -15,11 +15,12 @@
  * 
  */
 #include "num_utils.hpp"
+#include "data.hpp"
 
 namespace numutils
 {
 
-int getAValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, AssemblerState &state)
+int getAValue(Token &tok)
 {
     int val;
     if (tok.type == NUMBER)
@@ -28,10 +29,10 @@ int getAValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, Assemb
     }
     else
     {
-        Symbol sym = symbol_list.getSymbolFromTable(state.error, tok.s_value, state.in_process, state.process_name);
-        if (state.error)
+        Symbol sym = data::symbol_list.getSymbolFromTable(data::state.error, tok.s_value, data::state.in_process, data::state.process_name);
+        if (data::state.error)
         {
-            state.message = tok.s_value + " was not declared in this scope";
+            data::state.message = tok.s_value + " was not declared in this scope";
             return 0;
         }
         switch (sym.type())
@@ -43,29 +44,29 @@ int getAValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, Assemb
             val = sym.location();
             break;
         default:
-            state.error = 1;
-            state.message = tok.s_value + " must be a number, .const or .data value";
+            data::state.error = 1;
+            data::state.message = tok.s_value + " must be a number, .const or .data value";
             return 0;
         }
     }
 
-    while (token_list.hasNext())
+    while (data::token_list.hasNext())
     {
-        if (token_list.hasNext())
+        if (data::token_list.hasNext())
         {
-            checkOp(token_list, symbol_list, state, val);
-            if (state.error)
+            checkOp(val);
+            if (data::state.error)
                 return 0;
         }
-        if (!token_list.hasNext())
+        if (!data::token_list.hasNext())
             break;
     }
-    if (state.error)
+    if (data::state.error)
         return 0;
     return val;
 }
 
-int getIValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, AssemblerState &state)
+int getIValue(Token &tok)
 {
     int val;
     if (tok.type == NUMBER)
@@ -74,10 +75,10 @@ int getIValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, Assemb
     }
     else
     {
-        Symbol sym = symbol_list.getSymbolFromTable(state.error, tok.s_value, state.in_process, state.process_name);
-        if (state.error)
+        Symbol sym = data::symbol_list.getSymbolFromTable(data::state.error, tok.s_value, data::state.in_process, data::state.process_name);
+        if (data::state.error)
         {
-            state.message = tok.s_value + " was not declared in this scope";
+            data::state.message = tok.s_value + " was not declared in this scope";
             return 0;
         }
         switch (sym.type())
@@ -90,59 +91,59 @@ int getIValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, Assemb
             val = sym.location();
             break;
         default:
-            state.error = 1;
-            state.message = tok.s_value + " must be a number, label, .const or .data value";
+            data::state.error = 1;
+            data::state.message = tok.s_value + " must be a number, label, .const or .data value";
             return 0;
         }
     }
 
-    while (token_list.hasNext())
+    while (data::token_list.hasNext())
     {
-        if (token_list.hasNext())
+        if (data::token_list.hasNext())
         {
-            checkOp(token_list, symbol_list, state, val);
-            if (state.error)
+            checkOp(val);
+            if (data::state.error)
                 return 0;
         }
-        if (!token_list.hasNext())
+        if (!data::token_list.hasNext())
             break;
     }
-    if (state.error)
+    if (data::state.error)
         return 0;
     return val;
 }
 
-int getSizeValue(std::string &s_value, SymbolList &sl, AssemblerState &state)
+int getSizeValue(std::string &s_value)
 {
     TokenList tl;
     tl.getAllTokens(s_value);
     // size = getTotalValue(tl, sl, state);
-    int val = getNextValue(tl, sl, state);
-    if (state.error)
+    int val = getNextValue();
+    if (data::state.error)
         return 0;
     while (tl.hasNext())
     {
         if (tl.hasNext())
         {
-            checkOp(tl, sl, state, val);
-            if (state.error)
+            checkOp(val);
+            if (data::state.error)
                 return 0;
         }
         if (!tl.hasNext())
             break;
     }
-    if (state.error)
+    if (data::state.error)
         return 0;
     return val;
 }
 
-int getNextValue(TokenList &tl, SymbolList &sl, AssemblerState &state)
+int getNextValue()
 {
     int val;
-    Token t = tl.expect(state.error, {IDENTIFIER, NUMBER});
+    Token t = data::token_list.expect(data::state.error, {IDENTIFIER, NUMBER});
     Symbol s;
 
-    if (state.error)
+    if (data::state.error)
         return 0;
     switch (t.type)
     {
@@ -150,9 +151,9 @@ int getNextValue(TokenList &tl, SymbolList &sl, AssemblerState &state)
         val = t.value;
         break;
     case IDENTIFIER:
-        s = sl.getSymbolFromTable(state.error, t.s_value, state.in_process, state.process_name);
-        if (state.error){
-            state.message = t.s_value + " was not declared in this scope";
+        s = data::symbol_list.getSymbolFromTable(data::state.error, t.s_value, data::state.in_process, data::state.process_name);
+        if (data::state.error){
+            data::state.message = t.s_value + " was not declared in this scope";
             return 0;
         }
         switch (s.type())
@@ -165,29 +166,29 @@ int getNextValue(TokenList &tl, SymbolList &sl, AssemblerState &state)
             val = s.location();
             break;
         default:
-            state.error = 1;
-            state.message = t.s_value + " must be a .const or .data value";
+            data::state.error = 1;
+            data::state.message = t.s_value + " must be a .const or .data value";
             return 0;
         }
         break;
     default:
-        state.error = 1;
-        state.message = t.s_value + " must be a .const or .data value";
+        data::state.error = 1;
+        data::state.message = t.s_value + " must be a .const or .data value";
         return 0;
     }
     return val;
 }
 
-void checkOp(TokenList &tl, SymbolList &sl, AssemblerState &state, int &val)
+void checkOp(int &val)
 {
-    Token t = tl.expect(state.error, {OPERATOR});
-    if (state.error)
+    Token t = data::token_list.expect(data::state.error, {OPERATOR});
+    if (data::state.error)
     {
-        state.message = "Expected math operator (= - / *) but found -> " + t.s_value;
+        data::state.message = "Expected math operator (= - / *) but found -> " + t.s_value;
         return;
     }
-    int mod = getNextValue(tl, sl, state);
-    if (state.error)
+    int mod = getNextValue();
+    if (data::state.error)
         return;
 
     if (t.s_value == "*")

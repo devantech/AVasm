@@ -18,18 +18,15 @@
 #define NUMUTILS_HPP
 
 #include "token.hpp"
-#include "token_list.hpp"
-#include "symbols.hpp"
-#include "assembler_state.hpp"
 #include <string>
 
 namespace numutils
 {
-int getAValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, AssemblerState &state);
-int getIValue(Token &tok, TokenList &token_list, SymbolList &symbol_list, AssemblerState &state);
-int getNextValue(TokenList &tl, SymbolList &sl, AssemblerState &state);
-void checkOp(TokenList &tl, SymbolList &sl, AssemblerState &state, int &val);
-int getSizeValue(std::string &s_value, SymbolList &sl, AssemblerState &state);
+int getAValue(Token &tok);
+int getIValue(Token &tok);
+int getNextValue();
+void checkOp(int &val);
+int getSizeValue(std::string &s_value);
 } // namespace numutils
 
 /////////////////////////////////////////////////////////////////////////////////////////

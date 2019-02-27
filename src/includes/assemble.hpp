@@ -24,14 +24,7 @@
 #include <iostream>
 #include <regex>
 
-#include "string_utils.hpp"
-#include "macro.hpp"
-#include "symbols.hpp"
-#include "token_list.hpp"
-#include "options.hpp"
-#include "asm_data.hpp"
-#include "assembler_state.hpp"
-#include "data_type.hpp"
+#include "data.hpp"
 
 /*
 Assemble
@@ -43,16 +36,6 @@ class Assemble
 {
 private:
   std::ifstream &file;
-
-  /*
-  A list of symbols that have been defined in the program
-  */
-  SymbolList symbol_list;
-
-  /*
-  A loist of tokens that have been found on the current line
-  */
-  TokenList token_list;
 
   /*
   Preprocess the assembly file. During preprocessing the following happens:
@@ -160,15 +143,6 @@ private:
   void doMacro(Token &tok);
 
 public:
-  /*
-  The data that the assembler will produce
-  */
-  AsmData data;
-
-  /*
-  Stores the current state of this assembler
-  */
-  AssemblerState state;
 
   Assemble(std::ifstream &f) : file(f)
   {
@@ -178,7 +152,7 @@ public:
       ++line_count;
     file.clear();
     file.seekg(0, file.beg);
-    data.setListingLength(line_count);
+    data::data.setListingLength(line_count);
   };
 
   /*

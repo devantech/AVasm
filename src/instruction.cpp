@@ -1,0 +1,288 @@
+
+#include "instruction.hpp"
+#include "data.hpp"
+#include "string_utils.hpp"
+#include "num_utils.hpp"
+
+namespace instructions
+{
+
+void getReg(Symbol &sym)
+{
+    getSymbol(sym);
+    if (data::state.error == 1)
+        return;
+    if (data::token_list.get().type == INDIRECTION)
+    {
+        data::state.error = 1;
+        data::state.message = data::token_list.get().s_value + " can not be an indirection.";
+    }
+    if (sym.type() != REGISTER)
+    {
+        data::state.error = 1;
+        data::state.message = data::token_list.get().s_value + " is not a valid register";
+    }
+}
+
+void getSymbol(Symbol &sym)
+{
+    Token dest = data::token_list.expect(data::state.error, {IDENTIFIER, INDIRECTION});
+    if (data::state.error)
+    {
+        data::state.message = "Expected identifier but found -> " + data::token_list.get().s_value;
+        return;
+    }
+    sym = data::symbol_list.getSymbolFromTable(data::state.error, dest.s_value, data::state.in_process, data::state.process_name);
+    if (data::state.error)
+    {
+        data::state.message = dest.s_value + " not declared in this socpe";
+        return;
+    }
+}
+
+int checkComma(void)
+{
+    data::token_list.expect(data::state.error, {COMMA});
+    if (data::state.error)
+    {
+        data::state.error = 1;
+        data::state.message = "Expected , but found -> " + data::token_list.getNext().s_value;
+        return 0;
+    }
+    return 1;
+}
+
+int checkForMore(void)
+{
+    if (data::token_list.hasNext())
+    {
+        data::state.error = 1;
+        data::state.message = "Unexpected token found after instruction -> " + data::token_list.getNext().s_value;
+        return 0;
+    }
+    return 1;
+}
+
+void createALUInstruction(int command)
+{
+    Symbol target, rs1, rs2;
+
+    getALUTarget(target, command);
+    if (data::state.error)
+        return;
+
+    if (!checkComma())
+        return;
+
+    getReg(rs1);
+
+    if (!checkComma())
+        return;
+
+    getALUReg(rs2, command);
+    if (data::state.error)
+        return;
+
+    if (!checkForMore())
+        return;
+
+    std::string inst = stutils::int_to_hex(command);
+    inst += stutils::int_to_hex(target.location());
+    inst += stutils::int_to_hex(rs1.location());
+    inst += stutils::int_to_hex(rs2.location());
+
+    data::data.ins_list.push_back(inst);
+    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+}
+
+void getALUTarget(Symbol &sym, int &command)
+{
+    getSymbol(sym);
+    if (sym.type() == REGISTER)
+    {
+        Token t = data::token_list.get();
+        if (data::state.error)
+            return;
+        if (t.type == INDIRECTION)
+            command |= 0x80;
+    }
+    else
+    {
+        data::state.error = 1;
+        data::state.message = "Invalid target register for instruction -> " + data::token_list.get().s_value;
+    }
+}
+
+int getImmValue(void)
+{
+    Token t = data::token_list.expect(data::state.error, {NUMBER, IDENTIFIER});
+    if (data::state.error)
+        return 0;
+    
+    int val = numutils::getIValue(t);
+    if (data::state.error)
+        return 0;
+    return val;
+}
+
+void getALUReg(Symbol &sym, int &command)
+{
+    getSymbol(sym);
+    if (sym.type() == REGISTER)
+    {
+        Token t = data::token_list.get();
+        if (data::state.error)
+            return;
+        if (t.type == INDIRECTION)
+            command |= 0x40;
+    }
+    else
+    {
+        data::state.error = 1;
+        data::state.message = "Invalid register for instruction -> " + data::token_list.get().s_value;
+    }
+}
+
+void createJALRInstruction(int command)
+{
+    Symbol target, rs1, rs2;
+
+    getReg(target);
+    if (data::state.error)
+        return;
+
+    if (!checkComma())
+        return;
+
+    getReg(rs1);
+    if (data::state.error)
+        return;
+
+    if (!checkForMore())
+        return;
+
+    std::string inst = stutils::int_to_hex(command);
+    inst += stutils::int_to_hex(target.location());
+    inst += stutils::int_to_hex(rs1.location());
+    inst += stutils::int_to_hex(0);
+
+    data::data.ins_list.push_back(inst);
+    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+}
+
+void createJBSRInstruction(int command)
+{
+    Symbol target, rs1;
+    int imm;
+
+    getReg(target);
+
+    if (!checkComma())
+        return;
+
+    getReg(rs1);
+
+    if (!checkComma())
+        return;
+
+    imm = getImmValue();
+
+    if (!checkForMore())
+        return;
+
+    std::string inst = stutils::int_to_hex(command);
+    inst += stutils::int_to_hex(target.location());
+    inst += stutils::int_to_hex(rs1.location());
+    inst += stutils::int_to_hex(imm & 0xff);
+
+    data::data.ins_list.push_back(inst);
+    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+}
+
+void createJEQRInstruction(int command)
+{
+    Symbol target, rs1, rs2;
+
+    getReg(target);
+    if (data::state.error)
+        return;
+
+    if (!checkComma())
+        return;
+
+    getReg(rs1);
+    if (data::state.error)
+        return;
+
+    if (!checkComma())
+        return;
+
+    getReg(rs2);
+    if (data::state.error)
+        return;
+
+    if (!checkForMore())
+        return;
+
+    std::string inst = stutils::int_to_hex(command);
+    inst += stutils::int_to_hex(target.location());
+    inst += stutils::int_to_hex(rs1.location());
+    inst += stutils::int_to_hex(rs2.location());
+
+    data::data.ins_list.push_back(inst);
+    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+}
+
+void createLDIInstruction(int command)
+{
+    Symbol target;
+    getReg(target);
+    if (data::state.error)
+        return;
+
+    if (!checkComma())
+        return;
+
+    int imm = getImmValue();
+    if (data::state.error)
+        return;
+    
+    if (!checkForMore())
+        return;
+
+    std::string inst = stutils::int_to_hex(command);
+    inst += stutils::int_to_hex(target.location());
+    inst += stutils::int_to_hex((imm >> 8) & 0xff);
+    inst += stutils::int_to_hex(imm & 0xff);
+
+    data::data.ins_list.push_back(inst);
+    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+}
+
+void createSRLInstruction(int command)
+{
+    Symbol target, rs1, rs2;
+    
+    getALUTarget(target, command);
+    if (data::state.error)
+        return;
+    
+    if (!checkComma())
+        return;
+
+    getReg(rs1);
+        
+    
+    if (!checkForMore())
+        return;
+
+    std::string inst = stutils::int_to_hex(command);
+    inst += stutils::int_to_hex(target.location());
+    inst += stutils::int_to_hex(rs1.location());
+    inst += stutils::int_to_hex(0);
+
+    data::data.ins_list.push_back(inst);
+    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+}
+
+} // namespace instruction

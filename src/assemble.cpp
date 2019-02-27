@@ -16,45 +16,49 @@
  * 
  */
 #include "assemble.hpp"
+#include "string_utils.hpp"
+#include "macro.hpp"
+#include "options.hpp"
+#include "data_type.hpp"
 
 int Assemble::go()
 {
     preprocess();
-    if (state.error)
-        return state.error;
+    if (data::state.error)
+        return data::state.error;
     assemble();
-    if (state.error)
-        return state.error;
+    if (data::state.error)
+        return data::state.error;
     return 0;
 }
 
 void Assemble::preprocess(void)
 {
-    while (std::getline(file, state.line))
+    while (std::getline(file, data::state.line))
     {
-        state.line_number++;
-        std::string commentless = stutils::stripComment(state.line);
+        data::state.line_number++;
+        std::string commentless = stutils::stripComment(data::state.line);
         stutils::trim(commentless);
         if (commentless.empty())
         {
-            data.log(state.line_number, -1, "", state.line);
+            data::data.log(data::state.line_number, -1, "", data::state.line);
             continue;
         }
-        token_list.getAllTokens(commentless);
+        data::token_list.getAllTokens(commentless);
         preprocessLine();
-        if (state.error)
+        if (data::state.error)
         {
-            std::cout << "Error on line - " << state.line_number << std::endl;
-            std::cout << ">>> " << state.line << std::endl;
-            std::cout << ">>> " << state.message << std::endl;
+            std::cout << "Error on line - " << data::state.line_number << std::endl;
+            std::cout << ">>> " << data::state.line << std::endl;
+            std::cout << ">>> " << data::state.message << std::endl;
             return;
         }
     }
 
-    if (data.process_count < 7)
+    if (data::data.process_count < 7)
     {
-        state.error = 1;
-        state.message = "There must be a minimum of 7 processes in a project, only " + std::to_string(data.process_count) + " found.";
+        data::state.error = 1;
+        data::state.message = "There must be a minimum of 7 processes in a project, only " + std::to_string(data::data.process_count) + " found.";
         return;
     }
 
@@ -66,24 +70,24 @@ void Assemble::preprocess(void)
 
 void Assemble::assemble(void)
 {
-    state.line_number = 0;
-    state.prog_count = 0;
-    while (std::getline(file, state.line))
+    data::state.line_number = 0;
+    data::state.prog_count = 0;
+    while (std::getline(file, data::state.line))
     {
-        state.line_number++;
-        std::string commentless = stutils::stripComment(state.line);
+        data::state.line_number++;
+        std::string commentless = stutils::stripComment(data::state.line);
         stutils::trim(commentless);
         if (commentless.empty())
         {
             continue;
         }
-        token_list.getAllTokens(commentless);
+        data::token_list.getAllTokens(commentless);
         assembleLine();
-        if (state.error)
+        if (data::state.error)
         {
-            std::cout << "Error on line - " << state.line_number << std::endl;
-            std::cout << ">>> " << state.line << std::endl;
-            std::cout << ">>> " << state.message << std::endl;
+            std::cout << "Error on line - " << data::state.line_number << std::endl;
+            std::cout << ">>> " << data::state.line << std::endl;
+            std::cout << ">>> " << data::state.message << std::endl;
             return;
         }
     }
@@ -95,7 +99,7 @@ void Assemble::assemble(void)
 
 void Assemble::preprocessLine(void)
 {
-    Token t = token_list.getNext();
+    Token t = data::token_list.getNext();
     switch (t.type)
     {
     case REGISTER:
@@ -108,37 +112,37 @@ void Assemble::preprocessLine(void)
         doSymbol(DATA);
         break;
     case PROCESS:
-        state.in_process = true;
-        data.process_count++;
-        state.process_name = token_list.expect(state.error, {IDENTIFIER}).s_value + "_";
-        if (state.error)
+        data::state.in_process = true;
+        data::data.process_count++;
+        data::state.process_name = data::token_list.expect(data::state.error, {IDENTIFIER}).s_value + "_";
+        if (data::state.error)
             return;
         break;
     case ENDPROCESS:
         doEndProcess();
         break;
     case INSTRUCTION:
-        state.prog_count++;
+        data::state.prog_count++;
         break;
     case LABEL:
         doLabel(t);
-        if (token_list.hasNext())
+        if (data::token_list.hasNext())
             preprocessLine();
         break;
     case MACRO:
-        state.prog_count += instructions::getLengthOfMacro(t.s_value);
+        data::state.prog_count += instructions::getLengthOfMacro(t.s_value);
         break;
     case NONE:
     default:
-        state.message = "Unknown instruction --> " + t.s_value;
-        state.error = 1;
+        data::state.message = "Unknown instruction --> " + t.s_value;
+        data::state.error = 1;
         return;
     }
 }
 
 void Assemble::assembleLine(void)
 {
-    Token t = token_list.getNext();
+    Token t = data::token_list.getNext();
     Token i;
     switch (t.type)
     {
@@ -147,11 +151,11 @@ void Assemble::assembleLine(void)
     case DATA:
         break;
     case LABEL:
-        if (token_list.hasNext())
+        if (data::token_list.hasNext())
             assembleLine(); // A label may well have an instruction on the same line
         else                // So we call preprocessLine again so we can catch it
         {
-            data.log(state.line_number, state.prog_count, "", state.line);
+            data::data.log(data::state.line_number, data::state.prog_count, "", data::state.line);
         }
         break;
     case PROCESS:
@@ -168,69 +172,69 @@ void Assemble::assembleLine(void)
         break;
     case NONE:
     default:
-        state.message = "Unknown instruction --> " + t.s_value;
-        state.error = 1;
+        data::state.message = "Unknown instruction --> " + t.s_value;
+        data::state.error = 1;
         return;
     }
 }
 
 void Assemble::doLabel(Token &label)
 {
-    if (!state.in_process)
+    if (!data::state.in_process)
     {
-        state.error = 1;
-        state.message = "Label found outside of process";
+        data::state.error = 1;
+        data::state.message = "Label found outside of process";
         return;
     }
-    std::string s = state.process_name + label.s_value;
-    symbol_list.addSymbolToTable(state.error, label.type, state.prog_count, state.prog_count, state.prog_count, s);
+    std::string s = data::state.process_name + label.s_value;
+    data::symbol_list.addSymbolToTable(data::state.error, label.type, data::state.prog_count,data:: state.prog_count, data::state.prog_count, s);
 }
 
 void Assemble::doProcess(void)
 {
-    if (state.in_process)
+    if (data::state.in_process)
     {
-        state.error = 1;
-        state.message = ("Trying to declare process inside another process, did "
+        data::state.error = 1;
+        data::state.message = ("Trying to declare process inside another process, did "
                          "you forget an endprocess?");
         return;
     }
 
-    Token t = token_list.expect(state.error, {IDENTIFIER});
-    if (state.error)
+    Token t = data::token_list.expect(data::state.error, {IDENTIFIER});
+    if (data::state.error)
     {
-        state.message = "Expected valid process name but found -> " + t.s_value;
+        data::state.message = "Expected valid process name but found -> " + t.s_value;
         return;
     }
-    state.in_process = true;
-    state.process_name = t.s_value + "_";
-    data.pc_list.push_back(stutils::int_to_hex((state.prog_count >> 8) & 0xff) + stutils::int_to_hex(state.prog_count & 0xff));
-    if (token_list.hasNext())
+    data::state.in_process = true;
+    data::state.process_name = t.s_value + "_";
+    data::data.pc_list.push_back(stutils::int_to_hex((data::state.prog_count >> 8) & 0xff) + stutils::int_to_hex(data::state.prog_count & 0xff));
+    if (data::token_list.hasNext())
     {
-        state.error = 1;
-        state.message = ("Unexpected instruction found after process name.");
+        data::state.error = 1;
+        data::state.message = ("Unexpected instruction found after process name.");
         return;
     }
-    data.log(state.line_number, state.prog_count, "", state.line);
+    data::data.log(data::state.line_number, data::state.prog_count, "", data::state.line);
 }
 
 void Assemble::doEndProcess(void)
 {
-    if (!state.in_process)
+    if (!data::state.in_process)
     {
-        state.error = 1;
-        state.message = ("endprocess found with no matching process before it.");
+        data::state.error = 1;
+        data::state.message = ("endprocess found with no matching process before it.");
         return;
     }
-    state.in_process = false;
-    state.process_name = "";
-    if (token_list.hasNext())
+    data::state.in_process = false;
+    data::state.process_name = "";
+    if (data::token_list.hasNext())
     {
-        state.error = 1;
-        state.message = ("Unexpected instruction found after endprocess.");
+        data::state.error = 1;
+        data::state.message = ("Unexpected instruction found after endprocess.");
         return;
     }
-    data.log(state.line_number, -1, "", state.line);
+    data::data.log(data::state.line_number, -1, "", data::state.line);
 }
 
 void Assemble::doSymbol(int type)
@@ -238,13 +242,13 @@ void Assemble::doSymbol(int type)
     switch (type)
     {
     case REGISTER:
-        RegType(data, state, token_list, symbol_list).create();
+        data_type::createReg();
         break;
     case DATA:
-        DataType(data, state, token_list, symbol_list).create();
+        data_type::createData();
         break;
     case CONST:
-        ConstType(data, state, token_list, symbol_list).create();
+        data_type::createConst();
         break;
     }
 }
@@ -253,60 +257,60 @@ void Assemble::doInstruction(Token &ins)
 {
     if (ins.s_value == INSTRUCTION_NOP)
     {
-        data.ins_list.push_back("00000000");
-        data.log(state.line_number, state.prog_count++, "00000000", state.line);
+        data::data.ins_list.push_back("00000000");
+        data::data.log(data::state.line_number, data::state.prog_count++, "00000000", data::state.line);
         return;
     }
 
     switch (ins.value)
     {
     case INSTRUCTION_ADD_VALUE:
-        instructions::ADD(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_AND_VALUE:
-        instructions::AND(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JAL_VALUE:
-        instructions::JAL(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JALR_VALUE:
-        instructions::JALR(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JBCR_VALUE:
-        instructions::JBCR(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JBSR_VALUE:
-        instructions::JBSR(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JEQR_VALUE:
-        instructions::JEQR(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JGER_VALUE:
-        instructions::JGER(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JLTR_VALUE:
-        instructions::JLTR(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JNER_VALUE:
-        instructions::JNER(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JNZ_VALUE:
-        instructions::JNZ(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_JZ_VALUE:
-        instructions::JZ(data, state, token_list, symbol_list).build();
-        break;
-    case INSTRUCTION_LDI_VALUE:
-        instructions::LDI(data, state, token_list, symbol_list).build();
+        instructions::createALUInstruction(INSTRUCTION_ADD_VALUE);
         break;
     case INSTRUCTION_OR_VALUE:
-        instructions::OR(data, state, token_list, symbol_list).build();
+        instructions::createALUInstruction(INSTRUCTION_OR_VALUE);
         break;
-    case INSTRUCTION_SRL_VALUE:
-        instructions::SRL(data, state, token_list, symbol_list).build();
+    case INSTRUCTION_AND_VALUE:
+        instructions::createALUInstruction(INSTRUCTION_AND_VALUE);
         break;
     case INSTRUCTION_XOR_VALUE:
-        instructions::XOR(data, state, token_list, symbol_list).build();
+        instructions::createALUInstruction(INSTRUCTION_XOR_VALUE);
+        break;
+    case INSTRUCTION_SRL_VALUE:
+        instructions::createALUInstruction(INSTRUCTION_SRL_VALUE);
+        break;
+    case INSTRUCTION_JAL_VALUE:
+        instructions::createLDIInstruction(INSTRUCTION_JAL_VALUE);
+        break;
+    case INSTRUCTION_JNZ_VALUE:
+        instructions::createLDIInstruction(INSTRUCTION_JNZ_VALUE);
+        break;
+    case INSTRUCTION_JZ_VALUE:
+        instructions::createLDIInstruction(INSTRUCTION_JZ_VALUE);
+        break;
+    case INSTRUCTION_LDI_VALUE:
+        instructions::createLDIInstruction(INSTRUCTION_LDI_VALUE);
+        break;
+    case INSTRUCTION_JALR_VALUE:
+        instructions::createJALRInstruction(INSTRUCTION_JALR_VALUE);
+        break;
+    case INSTRUCTION_JEQR_VALUE:
+        instructions::createJALRInstruction(INSTRUCTION_JEQR_VALUE);
+        break;
+    case INSTRUCTION_JGER_VALUE:
+        instructions::createJALRInstruction(INSTRUCTION_JGER_VALUE);
+        break;
+    case INSTRUCTION_JLTR_VALUE:
+        instructions::createJALRInstruction(INSTRUCTION_JLTR_VALUE);
+        break;
+    case INSTRUCTION_JNER_VALUE:
+        instructions::createJALRInstruction(INSTRUCTION_JNER_VALUE);
+        break;
+    case INSTRUCTION_JBCR_VALUE:
+        instructions::createJBSRInstruction(INSTRUCTION_JBCR_VALUE);
+        break;
+    case INSTRUCTION_JBSR_VALUE:
+        instructions::createJBSRInstruction(INSTRUCTION_JBSR_VALUE);
         break;
     default:
         break;
@@ -316,45 +320,45 @@ void Assemble::doInstruction(Token &ins)
 void Assemble::doMacro(Token &t)
 {
     if (t.s_value == MACRO_CALL)
-        instructions::Call(data, state, token_list, symbol_list).build();
+        instructions::macroCall();
     else if (t.s_value == MACRO_DJNZ)
-        instructions::DJNZ(data, state, token_list, symbol_list).build();
+        instructions::macroDjnz();
     else if (t.s_value == MACRO_JMP)
-        instructions::JMP(data, state, token_list, symbol_list).build();
+        instructions::macroJmp();
     else if (t.s_value == MACRO_RETURN)
-        instructions::RET(data, state, token_list, symbol_list).build();
+        instructions::macroRet();
     else if (t.s_value == MACRO_SLL)
-        instructions::SLL(data, state, token_list, symbol_list).build();
+        instructions::macroSll();
     else if (t.s_value == MACRO_SUB)
-        instructions::Sub(data, state, token_list, symbol_list).build();
+        instructions::macroSub();
     else if (t.s_value == MACRO_JLER)
-        instructions::JLER(data, state, token_list, symbol_list).build();
+        instructions::macroJeq(INSTRUCTION_JLTR_VALUE);
     else if (t.s_value == MACRO_JGTR)
-        instructions::JGTR(data, state, token_list, symbol_list).build();
+        instructions::macroJeq(INSTRUCTION_JGER_VALUE);
     else if (t.s_value == MACRO_INC)
-        instructions::INC(data, state, token_list, symbol_list).build();
+        instructions::macroInc();
     else if (t.s_value == MACRO_DEC)
-        instructions::DEC(data, state, token_list, symbol_list).build();
+        instructions::macroDec();
     else if (t.s_value == MACRO_JEQ)
-        instructions::JEQ(data, state, token_list, symbol_list).build();
+        instructions::macroJeq(INSTRUCTION_JEQR_VALUE);
     else if (t.s_value == MACRO_JNE)
-        instructions::JNE(data, state, token_list, symbol_list).build();
+        instructions::macroJeq(INSTRUCTION_JNER_VALUE);
     else if (t.s_value == MACRO_JGT)
-        instructions::JGT(data, state, token_list, symbol_list).build();
+        instructions::macroJle(INSTRUCTION_JLTR_VALUE);
     else if (t.s_value == MACRO_JLE)
-        instructions::JLE(data, state, token_list, symbol_list).build();
+        instructions::macroJle(INSTRUCTION_JGER_VALUE);
     else if (t.s_value == MACRO_JLT)
-        instructions::JLT(data, state, token_list, symbol_list).build();
+        instructions::macroJeq(INSTRUCTION_JGER_VALUE);
     else if (t.s_value == MACRO_JGE)
-        instructions::JGE(data, state, token_list, symbol_list).build();
+        instructions::macroJeq(INSTRUCTION_JGER_VALUE);
     else if (t.s_value == MACRO_JBS)
-        instructions::JBS(data, state, token_list, symbol_list).build();
+        instructions::macroJbs(INSTRUCTION_JBSR_VALUE);
     else if (t.s_value == MACRO_JBC)
-        instructions::JBC(data, state, token_list, symbol_list).build();
+        instructions::macroJbs(INSTRUCTION_JBCR_VALUE);
     else if (t.s_value == MACRO_LD)
-        instructions::LD(data, state, token_list, symbol_list).build();
+        instructions::macroLd();
     else if (t.s_value == MACRO_ST)
-        instructions::ST(data, state, token_list, symbol_list).build();
+        instructions::macroSt();
     else if (t.s_value == MACRO_MOV)
-        instructions::MOV(data, state, token_list, symbol_list).build();
+        instructions::macroMov();
 }

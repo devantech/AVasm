@@ -15,6 +15,7 @@
  * 
  */
 #include "symbols.hpp"
+#include "symbol_list.hpp"
 
 int Symbol::type(void)
 {

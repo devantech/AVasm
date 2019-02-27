@@ -91,25 +91,25 @@ int main(int argc, char *argv[])
             Assemble comp(source);
             comp.go();
 
-            if (comp.state.error)
+            if (data::state.error)
             {
                 std::cout << "Build failed" << std::endl;
                 error = 1;
             }
             else
             {
-                comp.data.createConfigFile("config.v");
-                comp.data.createDataFile(opts.data_file);
-                comp.data.createProcessFile(opts.pc_file);
-                comp.data.createProgramFile(opts.inst_file);
-                comp.data.createRegFile(opts.reg_file);
-                comp.data.createListingFile(listingName(opts.input_file));
+                data::data.createConfigFile("config.v");
+                data::data.createDataFile(opts.data_file);
+                data::data.createProcessFile(opts.pc_file);
+                data::data.createProgramFile(opts.inst_file);
+                data::data.createRegFile(opts.reg_file);
+                data::data.createListingFile(listingName(opts.input_file));
                 if (!opts.quiet)
                 {
-                    std::cout << "processes " << comp.data.process_count << ", ";
-                    std::cout << "registers " << comp.data.reg_list.size() << ", ";
-                    std::cout << "data " << comp.data.data_list.size() << ", ";
-                    std::cout << "instructions " << comp.data.ins_list.size() << std::endl;
+                    std::cout << "processes " << data::data.process_count << ", ";
+                    std::cout << "registers " << data::data.reg_list.size() << ", ";
+                    std::cout << "data " << data::data.data_list.size() << ", ";
+                    std::cout << "instructions " << data::data.ins_list.size() << std::endl;
                 }
             }
 
