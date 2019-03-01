@@ -107,6 +107,7 @@ enum Types
 {
   NONE,
   IDENTIFIER,
+  SPLIT_IDENTIFIER,
   INSTRUCTION,
   COMMA,
   PROCESS,
@@ -115,7 +116,7 @@ enum Types
   DATA,
   CONST,
   MACRO,
-  NUMBER,
+  NUMBER, 
   INDIRECTION,
   SIZE,
   STRING,

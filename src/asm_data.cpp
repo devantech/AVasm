@@ -15,6 +15,7 @@
  * 
  */
 #include "asm_data.hpp"
+#include "process_map.hpp"
 
 void AsmData::setListingLength(int len)
 {
@@ -140,6 +141,29 @@ void AsmData::createProcessFile(std::string name)
     f.close();
 }
 
+void AsmData::createSequenceFile(std::string name)
+{
+    int lcm = getLCMForSeqData();
+    int step = p_list.size(); // Number of top level processes
+    std::ofstream f(name);
+    for (auto itt = p_list.begin(); itt != p_list.end(); ++itt)
+    {
+        ProcessData *pd = &*itt;
+        pd->buildLocationVector();
+    }
+    for (int i = 0; i < lcm; i++)
+    {
+        for (auto itt = p_list.begin(); itt != p_list.end(); ++itt)
+        {
+            ProcessData *pd = &*itt;
+            f << pd->getNextLocationOutput() + "\n";
+            sequenceCount +=1;
+        }
+    }
+    f.flush();
+    f.close();
+}
+
 void AsmData::createConfigFile(std::string name)
 {
     std::ofstream f(name);
@@ -147,7 +171,7 @@ void AsmData::createConfigFile(std::string name)
     f << "// These are assembler maintained constants.\n";
     f << "// Do not change manually.\n";
     f << "\n";
-    f << "parameter process_count = " << process_count << ";";
+    f << "parameter sequence_count = " << getLCMForSeqData() * p_list.size() << ";";
     f.flush();
     f.close();
 }

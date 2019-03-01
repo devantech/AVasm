@@ -30,7 +30,8 @@ class Options
     std::string pc_file = "pc_data";
     std::string inst_file = "inst_data";
     std::string reg_file = "reg_data";
-    std::string data_file = "dta_data";
+    std::string data_file = "ram_data";
+    std::string seq_file = "seq_data";
 
     bool help = false;
     bool version = false;

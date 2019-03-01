@@ -16,7 +16,7 @@ LXX = g++
 CXXFLAGS := -Os -std=c++11 -Isrc/includes -c
 LXXFLAGS := -s -Os
 
-# CXXFLAGS := -std=c++11 -Isrc/includes -c
+# CXXFLAGS := -g -std=c++11 -Isrc/includes -c
 # LXXFLAGS := -g
 
 BUILDDIR := build

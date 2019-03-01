@@ -16,6 +16,8 @@
  */
 #include "string_utils.hpp"
 #include "token.hpp"
+#include <sstream>
+#include <iostream>
 
 /**
  * Calculate the base of a string representation of a number.
@@ -100,4 +102,28 @@ std::string stutils::tokenType(int t)
     default:
         return "NONE";
     }
+}
+
+std::string stutils::getTopProcessFromSplit(std::string s)
+{
+    std::stringstream ss(s);
+    std::string item;
+    std::vector<std::string> splittedStrings;
+    while (std::getline(ss, item, '.'))
+    {
+       splittedStrings.push_back(item);
+    }
+    return splittedStrings[0];
+}
+
+std::string stutils::getSubProcessFromSplit(std::string s)
+{
+    std::stringstream ss(s);
+    std::string item;
+    std::vector<std::string> splittedStrings;
+    while (std::getline(ss, item, '.'))
+    {
+       splittedStrings.push_back(item);
+    }
+    return splittedStrings[1];
 }

@@ -102,8 +102,7 @@ void getLabel(Symbol &sym)
         return;
     if (sym.type() != LABEL)
     {
-        data::state.error = 1;
-        data::state.message = data::token_list.get().s_value + " is not a valid label";
+        data::setError(data::token_list.get().s_value + " is not a valid label");
     }
 }
 
@@ -126,8 +125,7 @@ void getMacroRegister(Symbol &sym, std::string suffix)
         }
         catch (std::invalid_argument &e)
         {
-            data::state.error = 1;
-            data::state.message = "Error processing sub command";
+            data::setError("Error processing sub command");
         }
     }
 }
@@ -143,8 +141,7 @@ bool getPossibleIndirectReg(Symbol & sym)
         if (t.type == INDIRECTION)
             return true;
     } else {
-        data::state.error = 1;
-        data::state.message = "Invalid target register for instruction -> " + data::token_list.get().s_value;
+        data::setError("Invalid target register for instruction -> " + data::token_list.get().s_value);
     }
     return false;
 }
@@ -162,7 +159,7 @@ int getMacroImmValue(void)
             data::state.message = "";
             return t.value;
         }
-        data::state.message = "Invalid immediate value";
+        data::setError("Invalid immediate value");
         return -1;
     }
 
@@ -171,8 +168,7 @@ int getMacroImmValue(void)
     case CONST:
         return sym.value();
     default:
-        data::state.error = 1;
-        data::state.message = "Invalid immediate value";
+        data::setError("Invalid immediate value");
         return -1;
     }
 }
@@ -307,8 +303,7 @@ void macroJbs(int command)
 
     if (imm > 15)
     {
-        data::state.error = 1;
-        data::state.message = "immediate value out of range (0 - 15)  but is value -> " + std::to_string(imm);
+        data::setError( "immediate value out of range (0 - 15)  but is value -> " + std::to_string(imm));
         return;
     }
 
@@ -510,8 +505,7 @@ void macroSt(void)
 
     if (!getPossibleIndirectReg(dest))
     {
-        data::state.error = 1;
-        data::state.message = "Destination register for st command must be an indirection.";
+        data::setError("Destination register for st command must be an indirection.");
         return;
     }
 
@@ -548,8 +542,7 @@ void macroLd(void)
 
     if (!getPossibleIndirectReg(reg))
     {
-        data::state.error = 1;
-        data::state.message = "Value register for ld command must be an indirection.";
+        data::setError("Value register for ld command must be an indirection.");
         return;
     }
 

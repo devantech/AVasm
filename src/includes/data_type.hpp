@@ -61,11 +61,14 @@ int checkForMore(void);
   */
 int getOperator(int &val);
 
+
+int getSizeAndValue(int &size, int &val, Token &tok);
+
+
 void createConst();
 void createData();
 void createReg();
 
-int getSizeAndValue(int &size, int &val, Token &tok);
 
 } // namespace data_type
 

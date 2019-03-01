@@ -78,6 +78,8 @@ int getImmValue();
 
 void createALUInstruction(int command);
 
+void createSRLInstruction(int command);
+
 void createLDIInstruction(int command);
 
 void createJALRInstruction(int command);

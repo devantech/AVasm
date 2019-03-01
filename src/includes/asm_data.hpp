@@ -27,6 +27,9 @@
 class AsmData
 {
 private:
+
+  int sequenceCount = 0;
+
   /*
     This is the listing output for the generated assembly code
     */
@@ -137,6 +140,13 @@ public:
     std::string dir     - the name of the file to be created.
     */
   void createProcessFile(std::string dir);
+
+  /*
+    create the sequence file on the disk.
+
+    std::string dir     - the name of the file to be created.
+  */
+  void createSequenceFile(std::string name);
 
   /*
     Create the config.v file on the disk.

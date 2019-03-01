@@ -32,6 +32,7 @@ void Options::processOptions(int ac, char **av)
         {"inst-file", required_argument, 0, 'p'},
         {"pc-file", required_argument, 0, 'l'},
         {"reg-file", required_argument, 0, 'r'},
+        {"seq-file", required_argument, 0, 's'},
         {0, 0, 0, 0}};
 
     if (ac < 2)
@@ -61,6 +62,9 @@ void Options::processOptions(int ac, char **av)
                 break;
             case 'r':
                 Options::reg_file = optarg;
+                break;
+            case 's':
+                Options::seq_file = optarg;
                 break;
             case 'v':
                 Options::version = true;

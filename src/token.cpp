@@ -178,10 +178,17 @@ int Token::checkIdentifier(void)
         type = COMMA;
         return 1;
     }
-    std::regex rex("(^[_a-zA-Z]+[_a-zA-Z0-9]*$)"); // regex to match an identifier
+    std::regex rex("(^[_a-zA-Z]+[_a-zA-Z0-9]*$)");                  // regex to match an identifier
     if (std::regex_match(s_value, rex))
     {
         type = IDENTIFIER;
+        value = 0;
+        return 1;
+    }
+    std::regex r("(^[_a-zA-Z]+[_a-zA-Z0-9]*+\\.[_a-zA-Z0-9]*$)"); // regex to match an split identifier
+    if (std::regex_match(s_value, r))
+    {
+        type = SPLIT_IDENTIFIER;
         value = 0;
         return 1;
     }

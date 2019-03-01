@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
             if (data::state.error)
             {
-                std::cout << "Build failed" << std::endl;
+                data::printError();
                 error = 1;
             }
             else
@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
                 data::data.createProcessFile(opts.pc_file);
                 data::data.createProgramFile(opts.inst_file);
                 data::data.createRegFile(opts.reg_file);
+                data::data.createSequenceFile(opts.seq_file);
                 data::data.createListingFile(listingName(opts.input_file));
                 if (!opts.quiet)
                 {

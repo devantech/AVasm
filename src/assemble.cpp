@@ -20,6 +20,8 @@
 #include "macro.hpp"
 #include "options.hpp"
 #include "data_type.hpp"
+#include "process_map.hpp"
+#include <iostream>
 
 int Assemble::go()
 {
@@ -29,6 +31,10 @@ int Assemble::go()
     assemble();
     if (data::state.error)
         return data::state.error;
+    if ((getLCMForSeqData() * p_list.size()) > 511)
+    {
+        data::setError("Sequence ram overflow (" + std::to_string(getLCMForSeqData() * p_list.size()) + "/511)");
+    }
     return 0;
 }
 
@@ -48,17 +54,13 @@ void Assemble::preprocess(void)
         preprocessLine();
         if (data::state.error)
         {
-            std::cout << "Error on line - " << data::state.line_number << std::endl;
-            std::cout << ">>> " << data::state.line << std::endl;
-            std::cout << ">>> " << data::state.message << std::endl;
             return;
         }
     }
 
-    if (data::data.process_count < 7)
+    if (p_list.size() < 7)
     {
-        data::state.error = 1;
-        data::state.message = "There must be a minimum of 7 processes in a project, only " + std::to_string(data::data.process_count) + " found.";
+        data::setError("There must be a minimum of 7 processes in a project, only " + std::to_string(data::data.process_count) + " found.");
         return;
     }
 
@@ -85,9 +87,6 @@ void Assemble::assemble(void)
         assembleLine();
         if (data::state.error)
         {
-            std::cout << "Error on line - " << data::state.line_number << std::endl;
-            std::cout << ">>> " << data::state.line << std::endl;
-            std::cout << ">>> " << data::state.message << std::endl;
             return;
         }
     }
@@ -100,6 +99,7 @@ void Assemble::assemble(void)
 void Assemble::preprocessLine(void)
 {
     Token t = data::token_list.getNext();
+    Token t2;
     switch (t.type)
     {
     case REGISTER:
@@ -113,8 +113,16 @@ void Assemble::preprocessLine(void)
         break;
     case PROCESS:
         data::state.in_process = true;
-        data::data.process_count++;
-        data::state.process_name = data::token_list.expect(data::state.error, {IDENTIFIER}).s_value + "_";
+        t2 = data::token_list.expect(data::state.error, {IDENTIFIER, SPLIT_IDENTIFIER});
+        try
+        {
+            addProcessData(t2.s_value, data::data.process_count++);
+        }
+        catch (std::invalid_argument &ex)
+        {
+            data::setError(t2.s_value + std::string(ex.what()));
+        }
+        data::state.process_name = t2.s_value + "_";
         if (data::state.error)
             return;
         break;
@@ -134,8 +142,7 @@ void Assemble::preprocessLine(void)
         break;
     case NONE:
     default:
-        data::state.message = "Unknown instruction --> " + t.s_value;
-        data::state.error = 1;
+        data::setError("Unknown instruction --> " + t.s_value);
         return;
     }
 }
@@ -172,8 +179,7 @@ void Assemble::assembleLine(void)
         break;
     case NONE:
     default:
-        data::state.message = "Unknown instruction --> " + t.s_value;
-        data::state.error = 1;
+        data::setError("Unknown instruction --> " + t.s_value);
         return;
     }
 }
@@ -182,37 +188,35 @@ void Assemble::doLabel(Token &label)
 {
     if (!data::state.in_process)
     {
-        data::state.error = 1;
-        data::state.message = "Label found outside of process";
+        data::setError("Label found outside of process");
         return;
     }
     std::string s = data::state.process_name + label.s_value;
-    data::symbol_list.addSymbolToTable(data::state.error, label.type, data::state.prog_count,data:: state.prog_count, data::state.prog_count, s);
+    data::symbol_list.addSymbolToTable(data::state.error, label.type, data::state.prog_count, data::state.prog_count, data::state.prog_count, s);
 }
 
 void Assemble::doProcess(void)
 {
     if (data::state.in_process)
     {
-        data::state.error = 1;
-        data::state.message = ("Trying to declare process inside another process, did "
-                         "you forget an endprocess?");
+        data::setError(("Trying to declare process inside another process, did "
+                        "you forget an endprocess?"));
         return;
     }
 
-    Token t = data::token_list.expect(data::state.error, {IDENTIFIER});
+    Token t = data::token_list.expect(data::state.error, {IDENTIFIER, SPLIT_IDENTIFIER});
     if (data::state.error)
     {
-        data::state.message = "Expected valid process name but found -> " + t.s_value;
+        data::setError("Expected valid process name but found -> " + t.s_value);
         return;
     }
     data::state.in_process = true;
     data::state.process_name = t.s_value + "_";
     data::data.pc_list.push_back(stutils::int_to_hex((data::state.prog_count >> 8) & 0xff) + stutils::int_to_hex(data::state.prog_count & 0xff));
+
     if (data::token_list.hasNext())
     {
-        data::state.error = 1;
-        data::state.message = ("Unexpected instruction found after process name.");
+        data::setError("Unexpected instruction found after process name.");
         return;
     }
     data::data.log(data::state.line_number, data::state.prog_count, "", data::state.line);
@@ -222,16 +226,14 @@ void Assemble::doEndProcess(void)
 {
     if (!data::state.in_process)
     {
-        data::state.error = 1;
-        data::state.message = ("endprocess found with no matching process before it.");
+        data::setError("endprocess found with no matching process before it.");
         return;
     }
     data::state.in_process = false;
     data::state.process_name = "";
     if (data::token_list.hasNext())
     {
-        data::state.error = 1;
-        data::state.message = ("Unexpected instruction found after endprocess.");
+        data::setError("Unexpected instruction found after endprocess.");
         return;
     }
     data::data.log(data::state.line_number, -1, "", data::state.line);
@@ -277,7 +279,7 @@ void Assemble::doInstruction(Token &ins)
         instructions::createALUInstruction(INSTRUCTION_XOR_VALUE);
         break;
     case INSTRUCTION_SRL_VALUE:
-        instructions::createALUInstruction(INSTRUCTION_SRL_VALUE);
+        instructions::createSRLInstruction(INSTRUCTION_SRL_VALUE);
         break;
     case INSTRUCTION_JAL_VALUE:
         instructions::createLDIInstruction(INSTRUCTION_JAL_VALUE);
@@ -295,16 +297,16 @@ void Assemble::doInstruction(Token &ins)
         instructions::createJALRInstruction(INSTRUCTION_JALR_VALUE);
         break;
     case INSTRUCTION_JEQR_VALUE:
-        instructions::createJALRInstruction(INSTRUCTION_JEQR_VALUE);
+        instructions::createJEQRInstruction(INSTRUCTION_JEQR_VALUE);
         break;
     case INSTRUCTION_JGER_VALUE:
-        instructions::createJALRInstruction(INSTRUCTION_JGER_VALUE);
+        instructions::createJEQRInstruction(INSTRUCTION_JGER_VALUE);
         break;
     case INSTRUCTION_JLTR_VALUE:
-        instructions::createJALRInstruction(INSTRUCTION_JLTR_VALUE);
+        instructions::createJEQRInstruction(INSTRUCTION_JLTR_VALUE);
         break;
     case INSTRUCTION_JNER_VALUE:
-        instructions::createJALRInstruction(INSTRUCTION_JNER_VALUE);
+        instructions::createJEQRInstruction(INSTRUCTION_JNER_VALUE);
         break;
     case INSTRUCTION_JBCR_VALUE:
         instructions::createJBSRInstruction(INSTRUCTION_JBCR_VALUE);

@@ -18,17 +18,20 @@
 #define NUMUTILS_HPP
 
 #include "token.hpp"
+#include "token_list.hpp"
+
 #include <string>
 
 namespace numutils
 {
 int getAValue(Token &tok);
 int getIValue(Token &tok);
-int getNextValue();
+int getNextValue(TokenList &tl);
 void checkOp(int &val);
 int getSizeValue(std::string &s_value);
+int getLcm(std::vector<int> & vec);
+int lcm(int a, int b);
+int gcd(int a, int b);
 } // namespace numutils
-
-/////////////////////////////////////////////////////////////////////////////////////////
 
 #endif

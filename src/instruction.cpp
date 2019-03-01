@@ -14,13 +14,11 @@ void getReg(Symbol &sym)
         return;
     if (data::token_list.get().type == INDIRECTION)
     {
-        data::state.error = 1;
-        data::state.message = data::token_list.get().s_value + " can not be an indirection.";
+        data::setError(data::token_list.get().s_value + " can not be an indirection.");
     }
     if (sym.type() != REGISTER)
     {
-        data::state.error = 1;
-        data::state.message = data::token_list.get().s_value + " is not a valid register";
+        data::setError(data::token_list.get().s_value + " is not a valid register");
     }
 }
 
@@ -29,13 +27,13 @@ void getSymbol(Symbol &sym)
     Token dest = data::token_list.expect(data::state.error, {IDENTIFIER, INDIRECTION});
     if (data::state.error)
     {
-        data::state.message = "Expected identifier but found -> " + data::token_list.get().s_value;
+        data::setError("Expected identifier but found -> " + data::token_list.get().s_value);
         return;
     }
     sym = data::symbol_list.getSymbolFromTable(data::state.error, dest.s_value, data::state.in_process, data::state.process_name);
     if (data::state.error)
     {
-        data::state.message = dest.s_value + " not declared in this socpe";
+        data::setError(dest.s_value + " not declared in this socpe");
         return;
     }
 }
@@ -45,8 +43,7 @@ int checkComma(void)
     data::token_list.expect(data::state.error, {COMMA});
     if (data::state.error)
     {
-        data::state.error = 1;
-        data::state.message = "Expected , but found -> " + data::token_list.getNext().s_value;
+        data::setError("Expected , but found -> " + data::token_list.getNext().s_value);
         return 0;
     }
     return 1;
@@ -56,8 +53,7 @@ int checkForMore(void)
 {
     if (data::token_list.hasNext())
     {
-        data::state.error = 1;
-        data::state.message = "Unexpected token found after instruction -> " + data::token_list.getNext().s_value;
+        data::setError("Unexpected token found after instruction -> " + data::token_list.getNext().s_value);
         return 0;
     }
     return 1;
@@ -91,8 +87,9 @@ void createALUInstruction(int command)
     inst += stutils::int_to_hex(rs1.location());
     inst += stutils::int_to_hex(rs2.location());
 
-    data::data.ins_list.push_back(inst);
-    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+    data::log(inst);
+    // data::data.ins_list.push_back(inst);
+    // data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
 }
 
 void getALUTarget(Symbol &sym, int &command)
@@ -108,8 +105,7 @@ void getALUTarget(Symbol &sym, int &command)
     }
     else
     {
-        data::state.error = 1;
-        data::state.message = "Invalid target register for instruction -> " + data::token_list.get().s_value;
+        data::setError("Invalid target register for instruction -> " + data::token_list.get().s_value);
     }
 }
 
@@ -138,8 +134,7 @@ void getALUReg(Symbol &sym, int &command)
     }
     else
     {
-        data::state.error = 1;
-        data::state.message = "Invalid register for instruction -> " + data::token_list.get().s_value;
+        data::setError("Invalid register for instruction -> " + data::token_list.get().s_value);
     }
 }
 
@@ -166,8 +161,9 @@ void createJALRInstruction(int command)
     inst += stutils::int_to_hex(rs1.location());
     inst += stutils::int_to_hex(0);
 
-    data::data.ins_list.push_back(inst);
-    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+    data::log(inst);
+    // data::data.ins_list.push_back(inst);
+    // data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
 }
 
 void createJBSRInstruction(int command)
@@ -195,8 +191,7 @@ void createJBSRInstruction(int command)
     inst += stutils::int_to_hex(rs1.location());
     inst += stutils::int_to_hex(imm & 0xff);
 
-    data::data.ins_list.push_back(inst);
-    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+    data::log(inst);
 }
 
 void createJEQRInstruction(int command)
@@ -229,8 +224,7 @@ void createJEQRInstruction(int command)
     inst += stutils::int_to_hex(rs1.location());
     inst += stutils::int_to_hex(rs2.location());
 
-    data::data.ins_list.push_back(inst);
-    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+    data::log(inst);
 }
 
 void createLDIInstruction(int command)
@@ -255,8 +249,7 @@ void createLDIInstruction(int command)
     inst += stutils::int_to_hex((imm >> 8) & 0xff);
     inst += stutils::int_to_hex(imm & 0xff);
 
-    data::data.ins_list.push_back(inst);
-    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+    data::log(inst);
 }
 
 void createSRLInstruction(int command)
@@ -281,8 +274,7 @@ void createSRLInstruction(int command)
     inst += stutils::int_to_hex(rs1.location());
     inst += stutils::int_to_hex(0);
 
-    data::data.ins_list.push_back(inst);
-    data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
+    data::log(inst);
 }
 
 } // namespace instruction

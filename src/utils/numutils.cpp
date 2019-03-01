@@ -16,6 +16,9 @@
  */
 #include "num_utils.hpp"
 #include "data.hpp"
+#include <iostream>
+#include <numeric>
+#include <vector>
 
 namespace numutils
 {
@@ -118,7 +121,7 @@ int getSizeValue(std::string &s_value)
     TokenList tl;
     tl.getAllTokens(s_value);
     // size = getTotalValue(tl, sl, state);
-    int val = getNextValue();
+    int val = getNextValue(tl);
     if (data::state.error)
         return 0;
     while (tl.hasNext())
@@ -137,10 +140,10 @@ int getSizeValue(std::string &s_value)
     return val;
 }
 
-int getNextValue()
+int getNextValue(TokenList & tl)
 {
     int val;
-    Token t = data::token_list.expect(data::state.error, {IDENTIFIER, NUMBER});
+    Token t = tl.expect(data::state.error, {IDENTIFIER, NUMBER});
     Symbol s;
 
     if (data::state.error)
@@ -187,7 +190,7 @@ void checkOp(int &val)
         data::state.message = "Expected math operator (= - / *) but found -> " + t.s_value;
         return;
     }
-    int mod = getNextValue();
+    int mod = getNextValue(data::token_list);
     if (data::state.error)
         return;
 
@@ -200,6 +203,30 @@ void checkOp(int &val)
     else if (t.s_value == "-")
         val = val - mod;
     return;
+}
+
+int gcd(int a, int b)
+{
+    for (;;)
+    {
+        if (a == 0) return b;
+        b %= a;
+        if (b == 0) return a;
+        a %= b;
+    }
+}
+
+int lcm(int a, int b)
+{
+    int temp = gcd(a, b);
+
+    return temp ? (a / temp * b) : 0;
+}
+
+
+int getLcm(std::vector<int> & vec)
+{
+    return std::accumulate(vec.begin(), vec.end(), 1, lcm);
 }
 
 } // namespace numutils

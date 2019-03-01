@@ -29,6 +29,14 @@ extern SymbolList symbol_list;
   */
 extern TokenList token_list;
 
+void setError(std::string s);
+
+void printError();
+
+void log(std::string s);
+
+void logMacro(std::string s);
+
 } // namespace data
 
 #endif

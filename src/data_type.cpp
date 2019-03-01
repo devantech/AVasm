@@ -11,8 +11,7 @@ int getIdentifier(Token &t)
     t = data::token_list.getNext();
     if (t.type != IDENTIFIER)
     {
-        data::state.error = 1;
-        data::state.message = "Expected identifier for data but found -> " + t.s_value;
+        data::setError("Expected identifier for data but found -> " + t.s_value);
         return 0;
     }
     return 1;
@@ -24,7 +23,7 @@ int getValue(int &val)
 
     if (data::state.error)
     {
-        data::state.message = "Undefined value being assigned ->  " + t.s_value;
+        data::setError("Undefined value being assigned ->  " + t.s_value);
         return 0;
     }
 
@@ -37,7 +36,7 @@ int getValue(int &val)
         Symbol sym = data::symbol_list.getSymbolFromTable(data::state.error, t.s_value, data::state.in_process, data::state.process_name);
         if (data::state.error)
         {
-            data::state.message = t.s_value + " not declared in this scope";
+            data::setError(t.s_value + " not declared in this scope");
             return 0;
         }
 
@@ -50,8 +49,7 @@ int getValue(int &val)
             val = sym.location();
             break;
         default:
-            data::state.error = 1;
-            data::state.message = t.s_value + " must be a number .const value or .data";
+            data::setError(t.s_value + " must be a number .const value or .data");
             return 0;
         }
     }
@@ -78,7 +76,7 @@ int getOperator(int &val)
     Token t = data::token_list.expect(data::state.error, {OPERATOR});
     if (data::state.error)
     {
-        data::state.message = "Unexpected token while setting value -> " + t.s_value;
+        data::setError("Unexpected token while setting value -> " + t.s_value);
         return 0;
     }
 
@@ -102,8 +100,7 @@ void createConst(void)
 {
     if (data::state.in_process)
     {
-        data::state.error = 1;
-        data::state.message = "Constant valaues must be declared in global scope";
+        data::setError("Constant valaues must be declared in global scope");
     }
 
     Token iden;
@@ -112,8 +109,7 @@ void createConst(void)
 
     if (!data::token_list.hasNext())
     {
-        data::state.error = 1;
-        data::state.message = "No value set for constant";
+        data::setError("No value set for constant");
         return;
     }
 
@@ -130,8 +126,7 @@ void createConst(void)
 
     if (checkForMore())
     { // There should be no more tokens here
-        data::state.error = 1;
-        data::state.message = "Unexpected token after setting constant value -> " + data::token_list.getNext().s_value;
+        data::setError("Unexpected token after setting constant value -> " + data::token_list.getNext().s_value);
         return;
     }
 
@@ -142,7 +137,7 @@ void createConst(void)
 
     data::symbol_list.addSymbolToTable(data::state.error, type, val, size, loc, name);
     if (data::state.error)
-        data::state.message = "Duplicate constant definition -> " + iden.s_value;
+        data::setError("Duplicate constant definition -> " + iden.s_value);
 
     std::string line = stutils::int_to_hex((val >> 8) & 0xff);
     line += stutils::int_to_hex(val & 0xff);
@@ -168,8 +163,7 @@ void createData(void)
 
     if (checkForMore())
     {
-        data::state.error = 1;
-        data::state.message = "Unexpected token after setting register value -> " + data::token_list.getNext().s_value;
+        data::setError("Unexpected token after setting register value -> " + data::token_list.getNext().s_value);
         return;
     }
 
@@ -225,7 +219,7 @@ void createData(void)
 
     data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
     if (data::state.error)
-        data::state.message = iden.s_value + " was already defined in this scope";
+        data::setError(iden.s_value + " was already defined in this scope");
 }
 
 int getSizeAndValue(int &size, int &val, Token &tok)
@@ -233,7 +227,7 @@ int getSizeAndValue(int &size, int &val, Token &tok)
     tok = data::token_list.expect(data::state.error, {IDENTIFIER, STRING, NUMBER, SIZE});
     if (data::state.error)
     {
-        data::state.message = "Invalid value being set -> " + tok.s_value;
+        data::setError("Invalid value being set -> " + tok.s_value);
         return 0;
     }
 
@@ -251,6 +245,7 @@ int getSizeAndValue(int &size, int &val, Token &tok)
             return 0;
         break;
     case SIZE:
+        
         size = numutils::getSizeValue(tok.s_value);
         if (data::state.error)
             return 0;
@@ -278,8 +273,7 @@ void createReg(void)
 
     if (checkForMore())
     {
-        data::state.error = 1;
-        data::state.message = "unexpected token after setting register value -> " + data::token_list.getNext().s_value;
+        data::setError("unexpected token after setting register value -> " + data::token_list.getNext().s_value);
         return;
     }
 
@@ -296,7 +290,7 @@ void createReg(void)
 
     data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
     if (data::state.error)
-        data::state.message = "Duplicate register definition -> " + iden.s_value;
+        data::setError("Duplicate register definition -> " + iden.s_value);
 }
 
 } // namespace data_type

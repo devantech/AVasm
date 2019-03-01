@@ -66,6 +66,9 @@ static inline std::string int_to_hex(const uint8_t &i)
 
 std::string tokenType(int t);
 
+std::string getTopProcessFromSplit(std::string s);
+
+std::string getSubProcessFromSplit(std::string s);
 
 } // namespace stutils
 
