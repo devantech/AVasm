@@ -357,7 +357,7 @@ void Assemble::doMacro(Token &t)
     else if (t.s_value == MACRO_JLE)
         instructions::macroJle(INSTRUCTION_JGER_VALUE);
     else if (t.s_value == MACRO_JLT)
-        instructions::macroJeq(INSTRUCTION_JGER_VALUE);
+        instructions::macroJeq(INSTRUCTION_JLTR_VALUE);
     else if (t.s_value == MACRO_JGE)
         instructions::macroJeq(INSTRUCTION_JGER_VALUE);
     else if (t.s_value == MACRO_JBS)
