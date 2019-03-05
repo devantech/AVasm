@@ -59,7 +59,15 @@ int getAValue(Token &tok)
         {
             checkOp(val);
             if (data::state.error)
+            {
+                if (data::token_list.get().type == COMMA)       // This little check here handles array defs which are just a comma seperated list of values
+                {
+                    data::state.error = 0;
+                    data::state.message = "";
+                    return val;
+                }
                 return 0;
+            }
         }
         if (!data::token_list.hasNext())
             break;
@@ -140,7 +148,7 @@ int getSizeValue(std::string &s_value)
     return val;
 }
 
-int getNextValue(TokenList & tl)
+int getNextValue(TokenList &tl)
 {
     int val;
     Token t = tl.expect(data::state.error, {IDENTIFIER, NUMBER});
@@ -155,7 +163,8 @@ int getNextValue(TokenList & tl)
         break;
     case IDENTIFIER:
         s = data::symbol_list.getSymbolFromTable(data::state.error, t.s_value, data::state.in_process, data::state.process_name);
-        if (data::state.error){
+        if (data::state.error)
+        {
             data::state.message = t.s_value + " was not declared in this scope";
             return 0;
         }
@@ -209,9 +218,11 @@ int gcd(int a, int b)
 {
     for (;;)
     {
-        if (a == 0) return b;
+        if (a == 0)
+            return b;
         b %= a;
-        if (b == 0) return a;
+        if (b == 0)
+            return a;
         a %= b;
     }
 }
@@ -223,8 +234,7 @@ int lcm(int a, int b)
     return temp ? (a / temp * b) : 0;
 }
 
-
-int getLcm(std::vector<int> & vec)
+int getLcm(std::vector<int> &vec)
 {
     return std::accumulate(vec.begin(), vec.end(), 1, lcm);
 }

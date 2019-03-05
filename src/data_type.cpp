@@ -18,6 +18,7 @@
 #include "data.hpp"
 #include "num_utils.hpp"
 #include "string_utils.hpp"
+#include <iostream>
 
 namespace data_type
 {
@@ -148,9 +149,11 @@ void createConst(void)
     int type = CONST;
     std::string name = data::state.process_name + iden.s_value;
 
-    try {
+    try
+    {
         data::symbol_list.addSymbolToTable(data::state.error, type, val, size, loc, name);
-    } catch (std::invalid_argument ex)
+    }
+    catch (std::invalid_argument ex)
     {
         data::setError("Constant value " + std::string(ex.what()) + iden.s_value);
     }
@@ -167,6 +170,8 @@ void createData(void)
     if (!getIdentifier(iden))
         return;
 
+    int location = data::state.data_count;
+    std::string line;
     int val = 0;  // Data registers do not have to have a value set so a value of 0 is defautlt
     int size = 1; // Unless this data is a string or array it will have a size of 1
     Token t;
@@ -177,20 +182,41 @@ void createData(void)
             return;
     }
 
+    if (t.type == NUMBER)   // De4al with an array of values
+    {
+        if (data::token_list.get().type == COMMA)
+        {
+            do
+            {
+                line = stutils::int_to_hex(val & 0xff);
+                data::data.data_list.push_back(line);
+                data::state.data_count++;
+                if (checkForMore()) // If there is an associated value grab it
+                {
+                    if (!getSizeAndValue(size, val, t))
+                        return;
+                }
+            } while (checkForMore());
+        }
+    }
+
+    if (data::token_list.get().type == COMMA)
+    {
+        data::setError("Unexpected comma at end of line");
+        return;
+    }
+
     if (checkForMore())
     {
         data::setError("Unexpected token after setting register value -> " + data::token_list.getNext().s_value);
         return;
     }
 
-    int location = data::state.data_count;
     data::state.data_count += size;
 
     std::string s = stutils::int_to_hex((val >> 8) & 0xff);
     s += stutils::int_to_hex(val & 0xff);
     data::data.log(data::state.line_number, location, s, data::state.line);
-
-    std::string line;
 
     /*
     Place however many entries size dictates into the data_list
@@ -237,11 +263,10 @@ void createData(void)
     {
         data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
     }
-    catch(const std::exception& ex)
+    catch (const std::exception &ex)
     {
         data::setError("Data value " + std::string(ex.what() + iden.s_value));
     }
-    
 }
 
 int getSizeAndValue(int &size, int &val, Token &tok)
@@ -267,7 +292,7 @@ int getSizeAndValue(int &size, int &val, Token &tok)
             return 0;
         break;
     case SIZE:
-        
+
         size = numutils::getSizeValue(tok.s_value);
         if (data::state.error)
             return 0;
@@ -314,7 +339,7 @@ void createReg(void)
     {
         data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
     }
-    catch(const std::exception& ex)
+    catch (const std::exception &ex)
     {
         data::setError("Register " + std::string(ex.what() + iden.s_value));
     }

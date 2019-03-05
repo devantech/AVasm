@@ -121,7 +121,8 @@ enum Types
   SIZE,
   STRING,
   LABEL,
-  OPERATOR
+  OPERATOR,
+  ARRAY
 };
 
 class Token
