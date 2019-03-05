@@ -192,7 +192,14 @@ void Assemble::doLabel(Token &label)
         return;
     }
     std::string s = data::state.process_name + label.s_value;
-    data::symbol_list.addSymbolToTable(data::state.error, label.type, data::state.prog_count, data::state.prog_count, data::state.prog_count, s);
+    try
+    {
+        data::symbol_list.addSymbolToTable(data::state.error, label.type, data::state.prog_count, data::state.prog_count, data::state.prog_count, s);
+    }
+    catch (std::invalid_argument ex)
+    {
+        data::setError("Label " + std::string(ex.what() + label.s_value));
+    }
 }
 
 void Assemble::doProcess(void)

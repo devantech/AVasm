@@ -44,7 +44,7 @@ void SymbolList::addSymbol(const std::string &key, const Symbol &value)
     }
     else
     {
-        throw std::invalid_argument("This key already exists --> " + key);
+        throw std::invalid_argument("allready defined in this scope --> ");
     }
 }
 
@@ -54,7 +54,7 @@ Symbol SymbolList::getSymbol(const std::string &key)
     {
         return symbol_table.at(key);
     }
-    throw std::invalid_argument("This key does not exist --> " + key);
+    throw std::invalid_argument("does not exist in this scope --> ");
 }
 
 void SymbolList::addSymbolToTable(int &err, int &type, int &val, int &size, int &location,
@@ -67,8 +67,7 @@ void SymbolList::addSymbolToTable(int &err, int &type, int &val, int &size, int 
     }
     catch (std::invalid_argument &e)
     {
-        err = 1;
-        return;
+        throw;
     }
 }
 

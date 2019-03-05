@@ -1,3 +1,19 @@
+/*
+ *  
+ *  Copyright(C) 2018 Gerald Coe, Devantech Ltd <gerry@devantech.co.uk>
+ * 
+ *  Permission to use, copy, modify, and/or distribute this software for any purpose with or
+ *  without fee is hereby granted, provided that the above copyright notice and 
+ *  this permission notice appear in all copies.
+ * 
+ *  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO
+ *  THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. 
+ *  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL 
+ *  DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+ *  AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ *  CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * 
+ */
 #include "data_type.hpp"
 #include "data.hpp"
 #include "num_utils.hpp"
@@ -121,9 +137,6 @@ void createConst(void)
     if (data::state.error)
         return;
 
-    // if (!getValue(val))
-    //     return;
-
     if (checkForMore())
     { // There should be no more tokens here
         data::setError("Unexpected token after setting constant value -> " + data::token_list.getNext().s_value);
@@ -135,9 +148,12 @@ void createConst(void)
     int type = CONST;
     std::string name = data::state.process_name + iden.s_value;
 
-    data::symbol_list.addSymbolToTable(data::state.error, type, val, size, loc, name);
-    if (data::state.error)
-        data::setError("Duplicate constant definition -> " + iden.s_value);
+    try {
+        data::symbol_list.addSymbolToTable(data::state.error, type, val, size, loc, name);
+    } catch (std::invalid_argument ex)
+    {
+        data::setError("Constant value " + std::string(ex.what()) + iden.s_value);
+    }
 
     std::string line = stutils::int_to_hex((val >> 8) & 0xff);
     line += stutils::int_to_hex(val & 0xff);
@@ -217,9 +233,15 @@ void createData(void)
     std::string name = data::state.process_name + iden.s_value;
     int type = DATA;
 
-    data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
-    if (data::state.error)
-        data::setError(iden.s_value + " was already defined in this scope");
+    try
+    {
+        data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
+    }
+    catch(const std::exception& ex)
+    {
+        data::setError("Data value " + std::string(ex.what() + iden.s_value));
+    }
+    
 }
 
 int getSizeAndValue(int &size, int &val, Token &tok)
@@ -288,9 +310,14 @@ void createReg(void)
     data::data.reg_list.push_back(line);
     data::data.log(data::state.line_number, location, line, data::state.line);
 
-    data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
-    if (data::state.error)
-        data::setError("Duplicate register definition -> " + iden.s_value);
+    try
+    {
+        data::symbol_list.addSymbolToTable(data::state.error, type, val, size, location, name);
+    }
+    catch(const std::exception& ex)
+    {
+        data::setError("Register " + std::string(ex.what() + iden.s_value));
+    }
 }
 
 } // namespace data_type
