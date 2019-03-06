@@ -42,6 +42,8 @@ std::unordered_map<std::string, int> Token::instructions = [] {
     m.insert(std::pair<std::string, int>(INSTRUCTION_JBSR,   INSTRUCTION_JBSR_VALUE));
     m.insert(std::pair<std::string, int>(INSTRUCTION_JBCR,   INSTRUCTION_JBCR_VALUE));
     m.insert(std::pair<std::string, int>(INSTRUCTION_NOP,   INSTRUCTION_NOP_VALUE));
+    m.insert(std::pair<std::string, int>(INSTRUCTION_SET,   INSTRUCTION_SET_VALUE));
+    m.insert(std::pair<std::string, int>(INSTRUCTION_CLR,   INSTRUCTION_CLR_VALUE));
     return m;
 }();
 

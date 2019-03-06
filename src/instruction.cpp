@@ -107,6 +107,35 @@ void createALUInstruction(int command)
     // data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
 }
 
+void createSetClrInstruction(int command)
+{
+    Symbol target, rs1;
+
+    getALUTarget(target, command);
+    if (data::state.error)
+        return;
+
+    if (!checkComma())
+        return;
+
+    getReg(rs1);
+
+    if (!checkComma())
+        return;
+
+    int imm = getImmValue();
+
+    if (!checkForMore())
+        return;
+
+    std::string inst = stutils::int_to_hex(command);
+    inst += stutils::int_to_hex(target.location());
+    inst += stutils::int_to_hex(rs1.location());
+    inst += stutils::int_to_hex(imm & 0xff);
+
+    data::log(inst);
+}
+
 void getALUTarget(Symbol &sym, int &command)
 {
     getSymbol(sym);

@@ -43,6 +43,8 @@ const int INSTRUCTION_JGER_VALUE = 0x9C;
 const int INSTRUCTION_JBSR_VALUE = 0x9D;
 const int INSTRUCTION_JBCR_VALUE = 0x9E;
 const int INSTRUCTION_NOP_VALUE = 0x00;
+const int INSTRUCTION_SET_VALUE = 0x07;
+const int INSTRUCTION_CLR_VALUE = 0x05;
 
 /*
 String values that are the instructions to the processor as written in an assembly file
@@ -64,6 +66,8 @@ const std::string INSTRUCTION_JGER = "jger";
 const std::string INSTRUCTION_JBSR = "jbsr";
 const std::string INSTRUCTION_JBCR = "jbcr";
 const std::string INSTRUCTION_NOP = "nop";
+const std::string INSTRUCTION_SET = "set";
+const std::string INSTRUCTION_CLR = "clr";
 
 /*
 String values that represent the macro commands available

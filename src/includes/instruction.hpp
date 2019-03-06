@@ -76,8 +76,28 @@ void getALUReg(Symbol &sym, int & command);
     */
 int getImmValue();
 
+/*
+Creates an instruction for an ALU opcode where the destination or source can be indirect
+
+int command     - The instruction value without the indirection bits set
+*/
 void createALUInstruction(int command);
 
+/*
+Creates an instruction for an ALU opcode where only the destination can be indirect.
+This is specific for the clr and set commands as they have an imm value instead of
+a source register.
+
+int command     - The instruction value without the indirection bits set
+*/
+void createSetClrInstruction(int command);
+
+/*
+This creates the srl instruction code. The destination register can be indirect but there is no 
+rs2 register to set
+
+int command     - The instruction value without the indirectionbits set
+*/
 void createSRLInstruction(int command);
 
 void createLDIInstruction(int command);
