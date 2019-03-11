@@ -30,7 +30,7 @@ const int INSTRUCTION_ADD_VALUE = 0x00;
 const int INSTRUCTION_OR_VALUE = 0x02;
 const int INSTRUCTION_AND_VALUE = 0x03;
 const int INSTRUCTION_XOR_VALUE = 0x04;
-const int INSTRUCTION_SRL_VALUE = 0x06;
+const int INSTRUCTION_SRL_VALUE = 0x05;
 const int INSTRUCTION_LDI_VALUE = 0x11;
 const int INSTRUCTION_JAL_VALUE = 0x12;
 const int INSTRUCTION_JZ_VALUE = 0x94;
@@ -43,8 +43,8 @@ const int INSTRUCTION_JGER_VALUE = 0x9C;
 const int INSTRUCTION_JBSR_VALUE = 0x9D;
 const int INSTRUCTION_JBCR_VALUE = 0x9E;
 const int INSTRUCTION_NOP_VALUE = 0x00;
-const int INSTRUCTION_SET_VALUE = 0x07;
-const int INSTRUCTION_CLR_VALUE = 0x05;
+const int INSTRUCTION_CLRB_VALUE = 0x06;
+const int INSTRUCTION_SETB_VALUE = 0x07;
 
 /*
 String values that are the instructions to the processor as written in an assembly file
@@ -66,8 +66,8 @@ const std::string INSTRUCTION_JGER = "jger";
 const std::string INSTRUCTION_JBSR = "jbsr";
 const std::string INSTRUCTION_JBCR = "jbcr";
 const std::string INSTRUCTION_NOP = "nop";
-const std::string INSTRUCTION_SET = "set";
-const std::string INSTRUCTION_CLR = "clr";
+const std::string INSTRUCTION_SETB = "setb";
+const std::string INSTRUCTION_CLRB = "clrb";
 
 /*
 String values that represent the macro commands available
