@@ -60,7 +60,7 @@ int getAValue(Token &tok)
             checkOp(val);
             if (data::state.error)
             {
-                if (data::token_list.get().type == COMMA)       // This little check here handles array defs which are just a comma seperated list of values
+                if (data::token_list.get().type == COMMA) // This little check here handles array defs which are just a comma seperated list of values
                 {
                     data::state.error = 0;
                     data::state.message = "";
@@ -114,7 +114,20 @@ int getIValue(Token &tok)
         {
             checkOp(val);
             if (data::state.error)
+            {
+                if (data::token_list.get().type == COMMA)
+                {
+                    // there is no error here, if we find a comma this means that
+                    // the imm value is in the middle of an instruction not on the end.
+                    // clear the error and move the token list pointer back one place
+                    // to make it look like we never hit an error.
+                    data::token_list.goBack();
+                    data::state.error = 0;
+                    data::state.message = "";
+                    return val;
+                }
                 return 0;
+            }
         }
         if (!data::token_list.hasNext())
             break;

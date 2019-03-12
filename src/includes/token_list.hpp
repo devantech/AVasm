@@ -95,6 +95,11 @@ class TokenList
     Token get();
 
     /*
+    move the pointer to the current token back one place
+    */
+    void goBack();
+
+    /*
     Takes a string in an an argument and finds all of the tokens that are in the string.
     Tokens found this way are added to this TokenList vector. Calling this method will cleat
     any tokens that are already in this list

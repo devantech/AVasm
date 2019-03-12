@@ -107,9 +107,10 @@ void createALUInstruction(int command)
     // data::data.log(data::state.line_number, data::state.prog_count++, inst, data::state.line);
 }
 
-void createSetClrInstruction(int command)
+void createSetbClrbInstruction(int command)
 {
     Symbol target, rs1;
+    std::string inst;
 
     getALUTarget(target, command);
     if (data::state.error)
@@ -118,21 +119,33 @@ void createSetClrInstruction(int command)
     if (!checkComma())
         return;
 
-    getReg(rs1);
-
-    if (!checkComma())
-        return;
-
     int imm = getImmValue();
 
-    if (!checkForMore())
-        return;
+    if (data::token_list.hasNext())
+    {
+        if (!checkComma())
+            return;
 
-    std::string inst = stutils::int_to_hex(command);
-    inst += stutils::int_to_hex(target.location());
-    inst += stutils::int_to_hex(rs1.location());
-    inst += stutils::int_to_hex(imm & 0xff);
+        getALUReg(rs1, command);
+        if (data::state.error)
+            return;
 
+        inst = stutils::int_to_hex(command);
+        inst += stutils::int_to_hex(target.location());
+        inst += stutils::int_to_hex(imm & 0xff);
+        inst += stutils::int_to_hex(rs1.location());
+    }
+    else
+    {
+        if (command & 0x80)
+        {
+            command |= 0x40;
+        }
+        inst = stutils::int_to_hex(command);
+        inst += stutils::int_to_hex(target.location());
+        inst += stutils::int_to_hex(imm & 0xff);
+        inst += stutils::int_to_hex(target.location());
+    }
     data::log(inst);
 }
 
@@ -158,7 +171,7 @@ int getImmValue(void)
     Token t = data::token_list.expect(data::state.error, {NUMBER, IDENTIFIER});
     if (data::state.error)
         return 0;
-    
+
     int val = numutils::getIValue(t);
     if (data::state.error)
         return 0;
@@ -220,7 +233,8 @@ void createJBSRInstruction(int command)
     if (!checkComma())
         return;
 
-    getReg(rs1);
+    getALUReg(rs1, command
+    );
 
     if (!checkComma())
         return;
@@ -232,8 +246,8 @@ void createJBSRInstruction(int command)
 
     std::string inst = stutils::int_to_hex(command);
     inst += stutils::int_to_hex(target.location());
-    inst += stutils::int_to_hex(rs1.location());
     inst += stutils::int_to_hex(imm & 0xff);
+    inst += stutils::int_to_hex(rs1.location());
 
     data::log(inst);
 }
@@ -284,7 +298,7 @@ void createLDIInstruction(int command)
     int imm = getImmValue();
     if (data::state.error)
         return;
-    
+
     if (!checkForMore())
         return;
 
@@ -299,17 +313,16 @@ void createLDIInstruction(int command)
 void createSRLInstruction(int command)
 {
     Symbol target, rs1, rs2;
-    
+
     getALUTarget(target, command);
     if (data::state.error)
         return;
-    
+
     if (!checkComma())
         return;
 
     getReg(rs1);
-        
-    
+
     if (!checkForMore())
         return;
 
@@ -321,4 +334,4 @@ void createSRLInstruction(int command)
     data::log(inst);
 }
 
-} // namespace instruction
+} // namespace instructions

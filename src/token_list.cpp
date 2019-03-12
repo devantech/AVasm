@@ -37,6 +37,11 @@ Token TokenList::get(void)
     return *(current - 1);
 }
 
+void TokenList::goBack()
+{
+    --current;
+}
+
 void TokenList::clear()
 {
     tokens.clear();

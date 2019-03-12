@@ -322,10 +322,10 @@ void Assemble::doInstruction(Token &ins)
         instructions::createJBSRInstruction(INSTRUCTION_JBSR_VALUE);
         break;
     case INSTRUCTION_SETB_VALUE:
-        instructions::createSetClrInstruction(INSTRUCTION_SETB_VALUE);
+        instructions::createSetbClrbInstruction(INSTRUCTION_SETB_VALUE);
         break;
     case INSTRUCTION_CLRB_VALUE:
-        instructions::createSetClrInstruction(INSTRUCTION_CLRB_VALUE);
+        instructions::createSetbClrbInstruction(INSTRUCTION_CLRB_VALUE);
         break;
     default:
         break;

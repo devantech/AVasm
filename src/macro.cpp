@@ -287,7 +287,7 @@ void macroJbs(int command)
     if (data::state.error == 1)
         return;
         
-    getReg(rs1);
+    getALUReg(rs1, command);
     if (data::state.error == 1)
         return;
 
@@ -321,8 +321,8 @@ void macroJbs(int command)
 
     std::string inst2 = stutils::int_to_hex(command);
     inst2 += stutils::int_to_hex(sym.location());
-    inst2 += stutils::int_to_hex(rs1.location());
     inst2 += stutils::int_to_hex(imm);
+    inst2 += stutils::int_to_hex(rs1.location());
 
     data::data.ins_list.push_back(inst1);
     data::data.insertLog(data::state.line_number, data::state.prog_count++, inst1, data::state.line);

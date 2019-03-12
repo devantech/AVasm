@@ -90,7 +90,7 @@ a source register.
 
 int command     - The instruction value without the indirection bits set
 */
-void createSetClrInstruction(int command);
+void createSetbClrbInstruction(int command);
 
 /*
 This creates the srl instruction code. The destination register can be indirect but there is no 
