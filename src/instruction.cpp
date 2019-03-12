@@ -48,7 +48,7 @@ void getSymbol(Symbol &sym)
     sym = data::symbol_list.getSymbolFromTable(data::state.error, dest.s_value, data::state.in_process, data::state.process_name);
     if (data::state.error)
     {
-        data::setError(dest.s_value + " not declared in this socpe");
+        data::setError(dest.s_value + " not declared in this scope");
         return;
     }
 }
