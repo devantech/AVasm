@@ -201,21 +201,25 @@ void macroCall(void)
 void macroDec()
 {
     Symbol dest;
-
+    int command = INSTRUCTION_ADD_VALUE;
     /*
     Get the symbols for the instructions
     */
-    getReg(dest);
+    getALUTarget(dest,command);
+
+    if (command != INSTRUCTION_ADD_VALUE)
+        command = 0xc0;
+
     if (data::state.error == 1)
         return;
 
     if (!checkForMore())
         return;
 
-    std::string inst = stutils::int_to_hex(INSTRUCTION_ADD_VALUE);
-    inst +=  stutils::int_to_hex(dest.location());
+    std::string inst = stutils::int_to_hex(command);
     inst +=  stutils::int_to_hex(dest.location());
     inst +=  "02";
+    inst +=  stutils::int_to_hex(dest.location());
 
     data::data.ins_list.push_back(inst);
     data::data.insertLog(data::state.line_number, data::state.prog_count++, inst, data::state.line);
@@ -259,21 +263,25 @@ void macroDjnz(void)
 void macroInc()
 {
     Symbol dest;
+    int command = INSTRUCTION_ADD_VALUE;
 
     /*
     Get the symbols for the instructions
     */
-    getReg(dest);
+    getALUTarget(dest, command);
+    if (command != INSTRUCTION_ADD_VALUE)
+        command = 0xC0;
+
     if (data::state.error == 1)
         return;
 
     if (!checkForMore())
         return;
 
-    std::string inst = stutils::int_to_hex(INSTRUCTION_ADD_VALUE);
-    inst +=  stutils::int_to_hex(dest.location());
+    std::string inst = stutils::int_to_hex(command);
     inst +=  stutils::int_to_hex(dest.location());
     inst +=  "01";
+    inst +=  stutils::int_to_hex(dest.location());
 
     data::data.ins_list.push_back(inst);
     data::data.insertLog(data::state.line_number, data::state.prog_count++, inst, data::state.line);
