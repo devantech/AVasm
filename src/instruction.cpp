@@ -229,18 +229,21 @@ void createJBSRInstruction(int command)
     int imm;
 
     getReg(target);
-
+    if (data::state.error)
+        return;
     if (!checkComma())
         return;
 
-    getALUReg(rs1, command
-    );
-
-    if (!checkComma())
-        return;
-
+    // getALUReg(rs1, command);
     imm = getImmValue();
+    if (data::state.error)
+        return;
+    if (!checkComma())
+        return;
 
+    getReg(rs1);
+    if (data::state.error)
+        return;
     if (!checkForMore())
         return;
 

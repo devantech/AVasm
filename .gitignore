@@ -1,0 +1,10 @@
+.vscode/
+build/
+config.v
+inst_data
+pc_data
+ram_data
+reg_data
+seq_data
+*.lst
+*.s
