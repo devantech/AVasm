@@ -102,9 +102,9 @@ Checks to see if a top level process is already defined in this program.
 
 returns true if it is and false if it is not.
 
-std::string & top      - the name of the top level process to check
+std::string & name      - the name of the top level process to check
 */
-bool doesTopLevelProcessExist(std::string top);
+bool doesTopLevelProcessExist(std::string &name);
 
 /*
 returns the LCM for the processes that have been defined in this program. 

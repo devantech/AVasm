@@ -132,17 +132,32 @@ bool doesTopLevelProcessExist(std::string &name)
 
 void addProcessData(std::string name, int loc)
 {
-
+    ProcessData *pd;
+    std::size_t found = name.find(".");
+    if (doesTopLevelProcessExist(name))
+    {
+        pd = getProcessWithTopName(name);
+        if (pd->split == true) {
+            if (found == std::string::npos) {
+                throw std::invalid_argument(" <-- this process is a split process and can not be used like this.");
+            }
+        } else if (pd->split == false) {
+            if (found != std::string::npos) {
+                throw std::invalid_argument(" <-- this process is not a split process and can not be used like this.");
+            }
+        }
+    }
+    
     if (checkIfProcessExists(name))
     {
         throw std::invalid_argument(" <-- process already defined");
     }
-    std::size_t found = name.find(".");
+    
     if (found != std::string::npos)
     {
         try
         {
-            ProcessData *pd = getProcessWithTopName(name);
+            pd = getProcessWithTopName(name);
 
             if (pd->split)
             {
@@ -160,8 +175,8 @@ void addProcessData(std::string name, int loc)
 
         }
     }
-    ProcessData pd(name, loc);
-    p_list.push_back(pd);
+    ProcessData p(name, loc);
+    p_list.push_back(p);
 }
 
 int getLCMForSeqData(void)
