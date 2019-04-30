@@ -1,0 +1,32 @@
+# For iceFUN board
+
+set_io -nowarn clk12MHz	P7
+
+set_io -nowarn led0	 	C10
+set_io -nowarn led1		A10
+set_io -nowarn led2		D7
+set_io -nowarn led3		D6
+set_io -nowarn led4 	A7
+set_io -nowarn led5 	C7
+set_io -nowarn led6 	A4
+set_io -nowarn led7 	C4
+set_io -nowarn lcol1	A12
+set_io -nowarn lcol2 	D10
+set_io -nowarn lcol3	A6
+set_io -nowarn lcol4	C5
+set_io -nowarn spkp 	M12
+set_io -nowarn spkm 	M6
+set_io -nowarn key1 	C11
+set_io -nowarn key2 	C6
+set_io -nowarn key3 	A11
+set_io -nowarn key4 	A5
+set_io -nowarn Red		P14
+set_io -nowarn Green 	N14
+set_io -nowarn Blue 	L14
+set_io -nowarn Tx 		P4
+set_io -nowarn Rx 		P5
+set_io -nowarn SDO	 	M11
+set_io -nowarn SDI	 	P11
+set_io -nowarn SCK	 	P12
+set_io -nowarn SS	 	P13
+
